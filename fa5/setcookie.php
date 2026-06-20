@@ -1,6 +1,4 @@
 <?php
-// setcookie.php
-// Sets three cookies: firstname (10s), middlename (20s), lastname (30s)
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstname = isset($_POST['firstname']) ? trim($_POST['firstname']) : '';
@@ -8,18 +6,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $lastname = isset($_POST['lastname']) ? trim($_POST['lastname']) : '';
 
     $now = time();
-    // Set cookies with the required expirations
     setcookie('firstname', $firstname, $now + 10, '/');
     setcookie('middlename', $middlename, $now + 20, '/');
     setcookie('lastname', $lastname, $now + 30, '/');
 
-    // Also store expiry timestamps in separate cookies (longer lived)
-    // so client-side JS and subsequent loads can compute remaining time.
     setcookie('firstname_exp', $now + 10, $now + 3600, '/');
     setcookie('middlename_exp', $now + 20, $now + 3600, '/');
     setcookie('lastname_exp', $now + 30, $now + 3600, '/');
 
-    // Redirect to avoid resubmission and to let the browser receive cookies
     header('Location: setcookie.php?set=1');
     exit;
 }
@@ -76,15 +70,12 @@ function get_cookie_safe($name) {
         <div id="middlename_status">Middle name: <span class="value"><?php echo get_cookie_safe('middlename') ?? '<em>not set</em>'; ?></span></div>
         <div id="lastname_status">Last name: <span class="value"><?php echo get_cookie_safe('lastname') ?? '<em>not set</em>'; ?></span></div>
     </div>
-    
     <script>
-    // Utility: read cookie by name
     function readCookie(name) {
         const match = document.cookie.match(new RegExp('(^|; )' + name + '=([^;]*)'));
         return match ? decodeURIComponent(match[2]) : null;
     }
 
-    // Read expiry timestamps stored in cookies (set server-side)
     function readExpiry(name) {
         const v = readCookie(name + '_exp');
         return v ? parseInt(v, 10) : null;
@@ -104,7 +95,6 @@ function get_cookie_safe($name) {
             const el = document.getElementById(it.key + '_status');
             let out = '';
             if (val !== null) {
-                // cookie exists
                 if (exp) {
                     const rem = exp - now;
                     out = '<span class="ok">' + val + '</span> — expires in ' + rem + 's';
@@ -115,7 +105,6 @@ function get_cookie_safe($name) {
                 if (exp) {
                     const rem = exp - now;
                     if (rem > 0) {
-                        // value cookie missing but expiry in future (unlikely) — show remaining
                         out = '<span class="expired">(missing)</span> — expected to expire in ' + rem + 's';
                     } else {
                         out = '<span class="expired">expired ' + Math.abs(rem) + 's ago</span>';
@@ -128,7 +117,6 @@ function get_cookie_safe($name) {
         });
     }
 
-    // Update every 1s so user can see when each cookie disappears
     updateStatus();
     setInterval(updateStatus, 1000);
     </script>
